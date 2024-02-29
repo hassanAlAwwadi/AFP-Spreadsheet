@@ -59,7 +59,7 @@ library
     import:           warnings
 
     -- Modules exported by the library.
-    exposed-modules:  MyLib
+    exposed-modules:  Spreadsheet
 
     -- Modules included in this library but not exported.
     -- other-modules:
@@ -68,10 +68,12 @@ library
     -- other-extensions:
 
     -- Other library packages from which modules are imported.
-    build-depends:    base ^>=4.17.2.1
+    build-depends:    
+        base,
+        repa
 
     -- Directories containing source files.
-    hs-source-dirs:   src
+    hs-source-dirs:   server/src
 
     -- Base language which the package is written in.
     default-language: GHC2021
@@ -91,11 +93,16 @@ executable AFP-Spreadsheet
 
     -- Other library packages from which modules are imported.
     build-depends:
-        base ^>=4.17.2.1,
+        base,
+        mtl, 
+        aeson,
+        servant,
+        servant-server,
+        warp,
         AFP-Spreadsheet
 
     -- Directories containing source files.
-    hs-source-dirs:   app
+    hs-source-dirs:   server/app
 
     -- Base language which the package is written in.
     default-language: GHC2021
@@ -117,12 +124,12 @@ test-suite AFP-Spreadsheet-test
     type:             exitcode-stdio-1.0
 
     -- Directories containing source files.
-    hs-source-dirs:   test
+    hs-source-dirs:   server/test
 
     -- The entrypoint to the test suite.
     main-is:          Main.hs
 
     -- Test dependencies.
     build-depends:
-        base ^>=4.17.2.1,
+        base,
         AFP-Spreadsheet
