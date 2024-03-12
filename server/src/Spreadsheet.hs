@@ -14,19 +14,20 @@ type Arr   = Map (Int, Int) (Formula, Int)
 type Graph = Map (Int, Int) [(Int, Int)] 
 
 data Spreadsheet = S { table :: Arr, backward :: Graph, forward :: Graph } 
+  deriving Show
 
 handle :: Input -> Spreadsheet -> Spreadsheet 
 handle i (S a b f) = let 
   b' = updateBackwardGraph i b
   f' = updateForwardGraph i b b' f -- ^, yes, we need a lot of extra info
   a'  = updateArr i a
-  a'' = propogate i a f
+  a'' = propogate i a' f 
   in S a' b' f'
 
 updateArr   :: Input  -> Arr -> Arr 
 updateArr (Cell (x,y) v) a = M.insert (x,y) (v, eval a (x,y) v) a
 
-propogate :: Input -> Arr -> Graph -> a2
+propogate :: Input -> Arr -> Graph -> Arr
 propogate (Cell (x,y) _) a f = 
   let next = concat $ f M.!? (x,y)  
   in undefined
@@ -48,8 +49,8 @@ updateBackwardGraph (Cell (x,y) v) g = case v of
 
 updateForwardGraph :: Input -> Graph -> Graph -> Graph -> Graph 
 updateForwardGraph (Cell (x,y) _) b b' f = let 
-  new_edges = concat $ b M.!? (x,y) 
-  old_edges = concat $ b' M.!? (x,y)
+  old_edges = concat $ b M.!? (x,y)
+  new_edges = concat $ b' M.!? (x,y) 
   rem_edges = old_edges \\ new_edges
   add_edges = new_edges \\ old_edges
   f'  = altFold' f rem_edges $ \acc r -> altAlter r acc $ \case 
