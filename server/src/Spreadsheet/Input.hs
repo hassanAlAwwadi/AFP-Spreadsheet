@@ -3,6 +3,6 @@ module Spreadsheet.Input where
 import Spreadsheet.Unit 
 
 data Input
-  = Aether  
-  | Cell (Int, Int) Formula
+  = Cell (Int, Int) Formula
 --  | Table (Int, Int) (Int, Int) [[Formula]] -- ^ mass update, ignored for now
+--  | Aether -- ^ time driven updates?
