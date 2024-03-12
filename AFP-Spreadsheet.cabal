@@ -96,13 +96,7 @@ executable AFP-Spreadsheet
 
     -- Other library packages from which modules are imported.
     build-depends:
-        base,
-        mtl, 
-        aeson,
-        servant,
-        servant-server,
-        warp,
-        AFP-Spreadsheet
+        base
 
     -- Directories containing source files.
     hs-source-dirs:   server/app
