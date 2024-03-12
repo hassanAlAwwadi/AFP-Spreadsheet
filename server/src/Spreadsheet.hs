@@ -4,9 +4,9 @@
 module Spreadsheet where
 import Spreadsheet.Input
 import Spreadsheet.Unit 
-
+import Util
 import Data.Map(Map)
-import Data.List(foldl', (\\), delete)
+import Data.List((\\), delete)
 import qualified Data.Map as M
 
 -- Placeholders
@@ -16,21 +16,17 @@ type Graph = Map (Int, Int) [(Int, Int)]
 data Spreadsheet = S { table :: Arr, backward :: Graph, forward :: Graph } 
   deriving Show
 
+
 handle :: Input -> Spreadsheet -> Spreadsheet 
 handle i (S a b f) = let 
-  b' = updateBackwardGraph i b
-  f' = updateForwardGraph i b b' f -- ^, yes, we need a lot of extra info
+  b'  = updateBackwardGraph i b
+  f'  = updateForwardGraph i b b' f -- ^, yes, we need a lot of extra info
   a'  = updateArr i a
-  a'' = propogate i a' f 
-  in S a' b' f'
+  a'' = propogate i a a' f' 
+  in S a'' b' f'
 
 updateArr   :: Input  -> Arr -> Arr 
 updateArr (Cell (x,y) v) a = M.insert (x,y) (v, eval a (x,y) v) a
-
-propogate :: Input -> Arr -> Graph -> Arr
-propogate (Cell (x,y) _) a f = 
-  let next = concat $ f M.!? (x,y)  
-  in undefined
 
 updateBackwardGraph :: Input -> Graph -> Graph 
 updateBackwardGraph (Cell (x,y) v) g = case v of 
@@ -41,11 +37,10 @@ updateBackwardGraph (Cell (x,y) v) g = case v of
     in adjustGraph r $ adjustGraph l start  where 
       adjustGraph (Raw _) graph           = graph
       adjustGraph (Plus l' r') graph      = adjustGraph r'  $ adjustGraph l' graph
-      adjustGraph (Reference x' y') graph = M.alter 
-        (\case Nothing  -> Just ([(locate x x', locate y y')])
-               Just ls  -> Just ((locate x x', locate y y') : ls)) 
-        (x,y) 
-        graph 
+      adjustGraph (Reference x' y') graph = altAlter (x,y) graph $ \case 
+        Nothing  -> Just ([(locate x x', locate y y')])
+        Just ls  -> Just ((locate x x', locate y y') : ls)
+        
 
 updateForwardGraph :: Input -> Graph -> Graph -> Graph -> Graph 
 updateForwardGraph (Cell (x,y) _) b b' f = let 
@@ -61,10 +56,17 @@ updateForwardGraph (Cell (x,y) _) b b' f = let
     Just l  -> Just $ (x,y):l   
   in f'' 
 
-altFold' :: Foldable t => b -> t a -> (b -> a -> b) -> b
-altFold' l r f = foldl' f l r 
-altAlter :: Ord k => k -> Map k a -> (Maybe a -> Maybe a) -> Map k a
-altAlter r m f = M.alter f r m
+propogate :: Input -> Arr -> Arr -> Graph -> Arr
+propogate (Cell (x,y) _) a a' f = let 
+  v  = snd <$> (a  M.!? (x,y))
+  v' = snd <$> (a' M.!? (x,y)) 
+  nexts = bfPaths (\l -> concat $ f M.!? l) (x,y) -- need to make this a topological sort for everything to work out. 
+  in if (v == v') 
+    then a' 
+    else altFold' a' nexts $ \acc frontier -> altFold' acc frontier $ \acc' n -> altAlter n acc' $ \case 
+      Nothing      -> error "broken graph in propagation?"
+      Just (fm, w) -> Just (fm, eval acc' n fm) -- actually need to somehow interweave this with the bfs 
+        -- because if w equals "eval acc' n fm", then we don't need to add its forward arcs into the frontier.
 
 eval :: Arr -> (Int, Int) -> Formula -> Int
 eval _ _ (Raw i)                  = i
@@ -76,8 +78,3 @@ eval arr (x,y) (Plus l r) = let
   l' = eval arr (x,y) l
   r' = eval arr (x,y) r 
   in l' + r' 
-
-locate :: Int -> Ref -> Int 
-locate _ (Loc i)           = i 
-locate (lodestone) (Rel i) = lodestone + i
-

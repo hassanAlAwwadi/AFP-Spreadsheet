@@ -11,3 +11,7 @@ data Ref
   = Loc Int 
   | Rel Int
   deriving Show 
+
+locate :: Int -> Ref -> Int 
+locate _ (Loc i)           = i 
+locate (lodestone) (Rel i) = lodestone + i
