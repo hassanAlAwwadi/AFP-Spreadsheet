@@ -8,7 +8,7 @@ import Util
 import Data.Map(Map)
 import Data.List((\\), delete, nub)
 import qualified Data.Map as M
-import Text.Pretty.Simple
+
 -- Placeholders
 type Arr   = Map (Int, Int) (Formula, Int)
 type Graph = Map (Int, Int) [(Int, Int)] 

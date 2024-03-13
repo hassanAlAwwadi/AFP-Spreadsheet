@@ -63,8 +63,10 @@ library
 
     -- Modules included in this library but not exported.
     other-modules:
-        Spreadsheet.Input
+        Util
         Spreadsheet.Unit
+        Spreadsheet.Input
+        Spreadsheet.Example
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
