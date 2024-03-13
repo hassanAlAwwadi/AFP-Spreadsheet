@@ -6,9 +6,9 @@ import Spreadsheet.Input
 import Spreadsheet.Unit 
 import Util
 import Data.Map(Map)
-import Data.List((\\), delete)
+import Data.List((\\), delete, nub)
 import qualified Data.Map as M
-
+import Text.Pretty.Simple
 -- Placeholders
 type Arr   = Map (Int, Int) (Formula, Int)
 type Graph = Map (Int, Int) [(Int, Int)] 
@@ -30,11 +30,11 @@ updateArr (Cell (x,y) v) a = M.insert (x,y) (v, eval a (x,y) v) a
 
 updateBackwardGraph :: Input -> Graph -> Graph 
 updateBackwardGraph (Cell (x,y) v) g = case v of 
-  Raw _           -> M.insert (x,y) [] g
+  Raw _           -> M.delete (x,y) g
   Reference x' y' -> M.insert (x,y) [(locate x x', locate y y')] g
   Plus l r        -> let 
     start = M.insert (x,y) [] g 
-    in adjustGraph r $ adjustGraph l start  where 
+    in M.alter (nub <$>) (x,y) $ adjustGraph r $ adjustGraph l start   where 
       adjustGraph (Raw _) graph           = graph
       adjustGraph (Plus l' r') graph      = adjustGraph r'  $ adjustGraph l' graph
       adjustGraph (Reference x' y') graph = altAlter (x,y) graph $ \case 
@@ -72,9 +72,9 @@ eval :: Arr -> (Int, Int) -> Formula -> Int
 eval _ _ (Raw i)                  = i
 eval arr (x,y) (Reference x' y')  = let 
   (nx,ny) = (locate x x', locate y y')
-  (_, r) = arr M.! (nx, ny) -- ^ otherwise malformed. Maybe want to add maybe to the end result
+  (_, r) = arr M.! (nx, ny) -- ^ otherwise malformed. Maybe want to add Maybe to the end result
   in r
-eval arr (x,y) (Plus l r) = let 
+eval arr (x,y) (Plus l r) = let
   l' = eval arr (x,y) l
   r' = eval arr (x,y) r 
   in l' + r' 
