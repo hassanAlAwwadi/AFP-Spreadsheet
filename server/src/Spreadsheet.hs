@@ -1,16 +1,14 @@
-{-# LANGUAGE TypeData, TypeFamilies, AllowAmbiguousTypes #-}
 {-# LANGUAGE LambdaCase #-}
-
 module Spreadsheet where
-import Spreadsheet.Input
-import Spreadsheet.Unit 
 import Util
+import Formula 
 import Data.Map(Map)
-import Data.List((\\), delete, nub)
+import Spreadsheet.Input
 import qualified Data.Map as M
+import Data.List((\\), delete, nub)
 
 -- Placeholders
-type Arr   = Map (Int, Int) (Formula, Int)
+type Arr   = Map (Int, Int) (Formula Int, Int)
 type Graph = Map (Int, Int) [(Int, Int)] 
 
 data Spreadsheet = S { table :: Arr, backward :: Graph, forward :: Graph } 
@@ -31,13 +29,13 @@ updateArr (Cell (x,y) v) a = M.insert (x,y) (v, eval a (x,y) v) a
 updateBackwardGraph :: Input -> Graph -> Graph 
 updateBackwardGraph (Cell (x,y) v) g = case v of 
   Raw _           -> M.delete (x,y) g
-  Reference x' y' -> M.insert (x,y) [(locate x x', locate y y')] g
-  Plus l r        -> let 
+  Ref x' y' -> M.insert (x,y) [(locate x x', locate y y')] g
+  Op _ l r        -> let 
     start = M.insert (x,y) [] g 
     in M.alter (nub <$>) (x,y) $ adjustGraph r $ adjustGraph l start   where 
       adjustGraph (Raw _) graph           = graph
-      adjustGraph (Plus l' r') graph      = adjustGraph r'  $ adjustGraph l' graph
-      adjustGraph (Reference x' y') graph = altAlter (x,y) graph $ \case 
+      adjustGraph (Op _ l' r') graph      = adjustGraph r'  $ adjustGraph l' graph
+      adjustGraph (Ref x' y') graph = altAlter (x,y) graph $ \case 
         Nothing  -> Just ([(locate x x', locate y y')])
         Just ls  -> Just ((locate x x', locate y y') : ls)
         
@@ -68,13 +66,16 @@ propogate (Cell (x,y) _) a a' f = let
       Just (fm, w) -> Just (fm, eval acc' n fm) -- actually need to somehow interweave this with the bfs 
         -- because if w equals "eval acc' n fm", then we don't need to add its forward arcs into the frontier.
 
-eval :: Arr -> (Int, Int) -> Formula -> Int
-eval _ _ (Raw i)                  = i
-eval arr (x,y) (Reference x' y')  = let 
+eval :: Arr -> (Int, Int) -> Formula Int -> Int
+eval _   _     (Raw i)      = i
+eval arr (x,y) (Ref x' y')  = let 
   (nx,ny) = (locate x x', locate y y')
   (_, r) = arr M.! (nx, ny) -- ^ otherwise malformed. Maybe want to add Maybe to the end result
   in r
-eval arr (x,y) (Plus l r) = let
+eval arr (x,y) (Op f l r) = let
   l' = eval arr (x,y) l
   r' = eval arr (x,y) r 
-  in l' + r' 
+  in f l' r' 
+eval arr (x,y) (Un f z) = let
+  z' = eval arr (x,y) z
+  in f z'
