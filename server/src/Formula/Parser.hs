@@ -25,8 +25,8 @@ fParser = P.skipSpaces *> P.choice
     <$> uParser 
     <*> fParser
   , Op 
-    <$> fParser -- wait will this cause left recursion to loop forever... Maybe?
     <$> bParser 
+    <$> fParser 
     <*> fParser
   ] where 
     tParser = P.choice 
