@@ -102,6 +102,7 @@ headBorderStyle =
     , Html.Attributes.style "height" "20px"
     , Html.Attributes.style "position" "sticky" -- Make it sticky
     , Html.Attributes.style "top" "100px" -- Stick 100px away from the top
+    , Html.Attributes.style "left" "0" -- Stick to the left
     , Html.Attributes.style "z-index" "1" -- Ensure the top border is on top
     ]
 
