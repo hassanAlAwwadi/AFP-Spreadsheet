@@ -26,7 +26,7 @@ fParser = P.skipSpaces *> P.choice
     <*> fParser
   , Op 
     <$> bParser 
-    <$> fParser 
+    <*> fParser 
     <*> fParser
   ] where 
     tParser = P.choice 
