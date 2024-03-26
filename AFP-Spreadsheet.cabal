@@ -59,14 +59,18 @@ library
     import:           warnings
 
     -- Modules exported by the library.
-    exposed-modules:  Spreadsheet
+    exposed-modules:  Spreadsheet,
+                      Spreadsheet.Input,
+                      -- adding this because I want access to Input
+                      Formula
+                      -- because I want Formula
 
     -- Modules included in this library but not exported.
     other-modules:
         Util
-        Spreadsheet.Input
+        -- Spreadsheet.Input
         Spreadsheet.Example
-        Formula
+        -- Formula
         Formula.Parser
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
@@ -92,14 +96,18 @@ executable AFP-Spreadsheet
     main-is:          Main.hs
 
     -- Modules included in this executable, other than Main.
-    -- other-modules:
+    other-modules:    API
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
 
     -- Other library packages from which modules are imported.
     build-depends:
-        base
+        base,
+        scotty,
+        aeson,
+        AFP-Spreadsheet,
+        mtl
 
     -- Directories containing source files.
     hs-source-dirs:   server/app

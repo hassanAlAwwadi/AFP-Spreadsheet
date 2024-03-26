@@ -1,4 +1,5 @@
 module Main where 
 
 
-main = pure ()
+main :: IO ()
+main = undefined
