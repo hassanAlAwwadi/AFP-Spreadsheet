@@ -10,6 +10,7 @@ type Msg =
   | HoverOverTopBorder Int Bool
   | HoverOverBotBorder Int Bool
   | HoverOver Coord Bool
+  | EditModeCell Coord
   | AddRows Int
   | AddColumns Int
 
@@ -31,5 +32,6 @@ type alias Model =
   , values : A.Array (A.Array (Cell))
   , selectedRange : (Coord, Coord)
   , clickPressed : Bool
+  , editingCell : Maybe Coord
   }
 

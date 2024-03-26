@@ -7,6 +7,7 @@ import Borders exposing (..)
 import Array as A
 import Cell exposing (..)
 import Model exposing (Msg(..))
+import Html.Events exposing (onDoubleClick)
 
 alphabeticalTags : Int -> List String
 alphabeticalTags n =
@@ -40,15 +41,30 @@ rowToHtmlWithIndex rIndex model =
                 cellContent = Maybe.withDefault "" (Maybe.map (\x -> x.content) cellValue)
                 cellStyleAttributes = Maybe.map (\cell -> cellStyle model cell model.selectedRange) cellValue |> Maybe.withDefault []
             in
-            Html.td (
-                 --add events to cells
-                   (onMouseDown (PressCell { x = cIndex, y = rIndex})) -- select begin
-                ::  onMouseUp ReleaseMouse -- select end
-                :: (onMouseOver (HoverOver { x = cIndex, y = rIndex} model.clickPressed)) -- drag/hover, depends on clickPressed
-                :: cellStyleAttributes) [ Html.text cellContent ]) -- to the base style
-            (List.range 0 (model.max_y - 1))
+            let
+                notSelected =
+                    Html.td (                                                                 -- add events to cells
+                       (onMouseDown (PressCell { x = cIndex, y = rIndex}))                    -- select begin
+                    :: onMouseUp ReleaseMouse                                                 -- select end
+                    :: onDoubleClick (EditModeCell { x = cIndex, y = rIndex})                 -- enter edit mode
+                    :: (onMouseOver (HoverOver { x = cIndex, y = rIndex} model.clickPressed)) -- drag/hover, depends on clickPressed
+                    :: cellStyleAttributes                                                    -- to the base style
+                    ) 
+                    [Html.text cellContent]
+                    
+                selected = Html.input 
+                    [
+                        Html.Attributes.style "width"  "50px"
+                    ,   Html.Attributes.style "height" "30px"
+                    ,   Html.Attributes.style "border" "3px solid #E1AFD1"
+                    ] []
+            in
+                case model.editingCell of
+                    Nothing      -> notSelected
+                    Just {x, y}  -> if x == cIndex && y == rIndex then selected else notSelected
+            ) (List.range 0 (model.max_y - 1))
     in
-    Html.tr [] (sideTag :: cells)
+        Html.tr [] (sideTag :: cells)
 
 createHeader : Model -> List (Html.Html Msg)
 createHeader model =

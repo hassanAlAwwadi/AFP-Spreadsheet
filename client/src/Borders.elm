@@ -16,15 +16,15 @@ isBetween a b x =
 sideBorderStyle : Model -> Int -> List (Html.Attribute msg)
 sideBorderStyle model index =
     let baseStyle = 
-            [ Html.Attributes.style "border" "1px solid #999" -- Dark gray border
+            [ Html.Attributes.style "border" "1px solid #999"
             , Html.Attributes.style "padding" "8px"
             , Html.Attributes.style "max-width" "40px"
             , Html.Attributes.style "min-height" "20px"
             , Html.Attributes.style "height" "20px"
             , Html.Attributes.style "min-width" "40px"
-            , Html.Attributes.style "position" "sticky" -- Make it sticky
-            , Html.Attributes.style "left" "0" -- Stick to the left
-            , Html.Attributes.style "top" "100px" -- Stick 100px away from the top
+            , Html.Attributes.style "position" "sticky"       -- Make it sticky
+            , Html.Attributes.style "left" "0" 
+            , Html.Attributes.style "top" "100px"             -- Stick 100px away from the top
             , Html.Attributes.style "user-select" "none"
             ]
         background =
@@ -39,15 +39,15 @@ sideBorderStyle model index =
 headBorderStyle  : Model -> Int -> List (Html.Attribute msg)
 headBorderStyle model index =
     let baseStyle =
-            [ Html.Attributes.style "border" "1px solid #999" -- Dark gray border
+            [ Html.Attributes.style "border" "1px solid #999" 
             , Html.Attributes.style "padding" "8px"
-            , Html.Attributes.style "background" "#f5f5f5" -- Light gray background
+            , Html.Attributes.style "background" "#f5f5f5"
             , Html.Attributes.style "min-width" "40px"
             , Html.Attributes.style "height" "20px"
             , Html.Attributes.style "position" "sticky" -- Make it sticky
-            , Html.Attributes.style "top" "100px" -- Stick 100px away from the top
-            , Html.Attributes.style "left" "0" -- Stick to the left
-            , Html.Attributes.style "z-index" "1" -- Ensure the top border is on top
+            , Html.Attributes.style "top" "100px"
+            , Html.Attributes.style "left" "0"          -- Stick to the left
+            , Html.Attributes.style "z-index" "1"       -- Ensure the top border is on top
             , Html.Attributes.style "user-select" "none"
             ]
         background =

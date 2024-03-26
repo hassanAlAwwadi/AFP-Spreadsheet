@@ -26,7 +26,7 @@ init =
                 )
             )
     in
-    Model numRows numCols initialGrid ({x = 0, y = 0}, {x = 0, y = 0}) False
+    Model numRows numCols initialGrid ({x = 0, y = 0}, {x = 0, y = 0}) False Nothing
 
 update : Msg -> Model -> Model
 update msg model =
@@ -37,6 +37,7 @@ update msg model =
         AddRows nr -> { model | max_y = model.max_y + nr}
         PressTopBorder x -> { model | selectedRange = ({x = x, y = 0}, {x = x, y = model.max_y}), clickPressed = True}
         PressBotBorder y -> { model | selectedRange = ({x = 0, y = y}, {x = model.max_x, y = y}), clickPressed = True}
+        EditModeCell cell -> { model | editingCell = Just cell }
         HoverOverTopBorder x clickPressed -> if clickPressed 
             then
                 case model.selectedRange of
