@@ -1,6 +1,13 @@
-module Model exposing (Model, Cell, Coord)
+module Model exposing (..)
 
 import Array as A
+
+type Msg = 
+    PressCell Coord
+  | ReleaseMouse
+  | HoverOver Coord Bool
+  | AddRows Int
+  | AddColumns Int
 
 type alias Coord = { 
   x : Int,
