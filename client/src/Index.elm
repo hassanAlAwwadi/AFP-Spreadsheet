@@ -35,6 +35,20 @@ update msg model =
         ReleaseMouse -> {model | clickPressed = False }
         AddColumns nr -> { model | max_x = model.max_x + nr}
         AddRows nr -> { model | max_y = model.max_y + nr}
+        PressTopBorder x -> { model | selectedRange = ({x = x, y = 0}, {x = x, y = model.max_y}), clickPressed = True}
+        PressBotBorder y -> { model | selectedRange = ({x = 0, y = y}, {x = model.max_x, y = y}), clickPressed = True}
+        HoverOverTopBorder x clickPressed -> if clickPressed 
+            then
+                case model.selectedRange of
+                    (start, end) -> { model | selectedRange = (start, { x = x, y = end.y }) }
+            else
+                model
+        HoverOverBotBorder y clickPressed -> if clickPressed 
+            then
+                case model.selectedRange of
+                    (start, end) -> { model | selectedRange = (start, { x = end.x, y = y }) }
+            else
+                model
         HoverOver { x, y } clickPressed ->
             if clickPressed 
             then

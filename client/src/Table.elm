@@ -27,7 +27,12 @@ rowToHtmlWithIndex : Int -> Model -> Html.Html Msg
 rowToHtmlWithIndex rIndex model =
     let 
         sideTag = 
-            Html.td (sideBorderStyle model rIndex) [ Html.text (String.fromInt (rIndex + 1))]
+            Html.td 
+            (  onMouseDown (PressBotBorder rIndex)
+            :: onMouseOver (HoverOverBotBorder rIndex model.clickPressed)
+            :: onMouseUp ReleaseMouse
+            :: (sideBorderStyle model rIndex))
+            [ Html.text (String.fromInt (rIndex + 1))]
         
         cells = List.indexedMap (\cIndex _ -> 
             let 
@@ -45,7 +50,7 @@ rowToHtmlWithIndex rIndex model =
     in
     Html.tr [] (sideTag :: cells)
 
-createHeader : Model -> List (Html.Html msg)
+createHeader : Model -> List (Html.Html Msg)
 createHeader model =
     let
         headers =
@@ -55,7 +60,12 @@ createHeader model =
           Html.Attributes.style "background" "#d4d4d4"
           ] []
     in
-    corner :: (List.indexedMap (\index header -> Html.th (headBorderStyle model index) [Html.text header]) headers)
+    corner :: (List.indexedMap (\index header -> 
+        Html.th (
+           onMouseDown (PressTopBorder index)
+        :: onMouseOver (HoverOverTopBorder index model.clickPressed)
+        :: onMouseUp ReleaseMouse
+        :: (headBorderStyle model index)) [Html.text header]) headers)
 
 myTable : Model -> Html.Html Msg
 myTable model =

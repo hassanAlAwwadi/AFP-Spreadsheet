@@ -5,6 +5,10 @@ import Array as A
 type Msg = 
     PressCell Coord
   | ReleaseMouse
+  | PressTopBorder Int
+  | PressBotBorder Int
+  | HoverOverTopBorder Int Bool
+  | HoverOverBotBorder Int Bool
   | HoverOver Coord Bool
   | AddRows Int
   | AddColumns Int
