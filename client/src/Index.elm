@@ -3,7 +3,9 @@ import Array as A
 import Browser
 import Html.Attributes exposing (attribute)
 import Html exposing (node)
-import Model exposing (Model, Cell)
+import Model exposing (Model, Cell, Coord)
+import Html.Events exposing (onClick,onMouseDown, onMouseOver, onMouseUp)
+import Browser.Events
 
 main : Program () Model Msg
 main =
@@ -12,18 +14,24 @@ main =
 init : Model
 init = 
     let
-        defaultCellValue = Cell "" False
-        initialRow = A.repeat 100 defaultCellValue
-        initialValue = A.repeat 100 initialRow
+        numRows = 100
+        numCols = 100
+        initialGrid : A.Array (A.Array Cell)
+        initialGrid =
+            A.initialize numRows (\row ->
+                A.initialize numCols (\col ->
+                    Cell row col ""
+                )
+            )
     in
-    Model 100 100 initialValue
+    Model numRows numCols initialGrid ({x = 0, y = 0}, {x = 0, y = 0}) False
 
-type alias Msg = 
-  { x : Int
-  , y : Int 
-  , v : Cell
-  }
+type Msg = 
+    PressCell Coord
+  | ReleaseMouse
+  | HoverOver Coord Bool
 
+stylesheet : Html.Html msg
 stylesheet =
     let
         tag = "link"
@@ -37,27 +45,17 @@ stylesheet =
         node tag attrs children
 
 update : Msg -> Model -> Model
-update msg model = 
-  let mx  = A.get msg.x model.values
-  in 
-  case mx of 
-    Nothing -> model
-    Just xr -> 
-      let 
-        xrp = A.set msg.y msg.v xr
-        vlp = A.set msg.x xrp model.values
-      in { model | values = vlp}
+update msg model =
+    case msg of
+        PressCell { x, y } -> { model | selectedRange = ({ x = x, y = y }, { x = x, y = y }), clickPressed = True }
+        ReleaseMouse -> {model | clickPressed = False }
+        HoverOver { x, y } clickPressed ->
+            case clickPressed of
+                True  -> case model.selectedRange of
+                    (start, _) -> { model | selectedRange = (start, { x = x, y = y }) }
+                False -> model
 
-
-tableData : List (List String)
-tableData =
-    [ ["Name", "Age", "Country"]
-    , ["John", "30", "USA"]
-    , ["Alice", "25", "Canada"]
-    , ["Bob", "35", "UK"]
-    ]
-
-rowToHtmlWithIndex : Int -> Model -> Html.Html msg
+rowToHtmlWithIndex : Int -> Model -> Html.Html Msg
 rowToHtmlWithIndex rIndex model =
     let 
         sideTag = 
@@ -67,17 +65,44 @@ rowToHtmlWithIndex rIndex model =
             let 
                 cellValue = Maybe.andThen (\row -> A.get rIndex row) (A.get cIndex model.values)
                 cellContent = Maybe.withDefault "" (Maybe.map (\x -> x.content) cellValue)
+                cellStyleAttributes = Maybe.map (\cell -> cellStyle cell model.selectedRange) cellValue |> Maybe.withDefault []
             in
-            Html.td cellStyle [ Html.text cellContent ]) (List.range 0 (model.max_y - 1))
+            Html.td (
+                 --add events to cells
+                   (onMouseDown (PressCell { x = cIndex, y = rIndex})) -- select begin
+                ::  onMouseUp ReleaseMouse -- select end
+                :: (onMouseOver (HoverOver { x = cIndex, y = rIndex} model.clickPressed)) -- drag/hover, depends on clickPressed
+                :: cellStyleAttributes) [ Html.text cellContent ]) -- to the base style
+            (List.range 0 (model.max_y - 1))
     in
     Html.tr [] (sideTag :: cells)
 
 
-cellStyle : List (Html.Attribute msg)
-cellStyle =
-    [ Html.Attributes.style "border" "1px solid #ccc" -- Light gray border
-    , Html.Attributes.style "padding" "8px"
-    ]
+isBetween : Coord -> Coord -> Int -> Int -> Bool
+isBetween startCoord endCoord cx cy =
+    let
+        minX = min startCoord.x endCoord.x
+        minY = min startCoord.y endCoord.y
+        maxX = max startCoord.x endCoord.x
+        maxY = max startCoord.y endCoord.y
+    in
+    cx >= minX && cx <= maxX && cy >= minY && cy <= maxY
+
+cellStyle : Cell -> (Coord, Coord) -> List (Html.Attribute msg)
+cellStyle cell (startCoord, endCoord) =
+    let
+        baseStyle =
+            [ Html.Attributes.style "border" "1px solid #ccc" -- Light gray border
+            , Html.Attributes.style "padding" "8px"
+            ]
+
+        selectedStyle =
+            if isBetween startCoord endCoord cell.pos_x cell.pos_y then
+                [Html.Attributes.style "background" "gray"]
+            else
+                []
+    in
+    baseStyle ++ selectedStyle
 
 sideBorderStyle : List (Html.Attribute msg)
 sideBorderStyle =
@@ -91,6 +116,7 @@ sideBorderStyle =
     , Html.Attributes.style "position" "sticky" -- Make it sticky
     , Html.Attributes.style "left" "0" -- Stick to the left
     , Html.Attributes.style "top" "100px" -- Stick 100px away from the top
+    , Html.Attributes.style "user-select" "none"
     ]
 
 headBorderStyle : List (Html.Attribute msg)
@@ -104,6 +130,7 @@ headBorderStyle =
     , Html.Attributes.style "top" "100px" -- Stick 100px away from the top
     , Html.Attributes.style "left" "0" -- Stick to the left
     , Html.Attributes.style "z-index" "1" -- Ensure the top border is on top
+    , Html.Attributes.style "user-select" "none"
     ]
 
 
@@ -134,7 +161,7 @@ createHeader numColumns =
     in
     corner :: (List.map (\header -> Html.th headBorderStyle [Html.text header]) headers)
 
-myTable : Model -> Html.Html msg
+myTable : Model -> Html.Html Msg
 myTable model =
     Html.table [
        Html.Attributes.style "border-collapse" "collapse", 
@@ -169,7 +196,7 @@ navbar =
         [ Html.text "Excel, supposedly" ]
 
 view : Model -> Html.Html Msg
-view model = Html.div [] [
+view model = Html.div [Html.Attributes.style "user-drag" "none"] [
   navbar,
   myTable model
   ]

@@ -1,15 +1,24 @@
-module Model exposing (Model, Cell)
+module Model exposing (Model, Cell, Coord)
 
 import Array as A
 
+type alias Coord = { 
+  x : Int,
+  y : Int
+  }
+
 type alias Cell =
-    { content : String
-    , selected : Bool
+    { 
+      pos_x : Int
+    , pos_y : Int
+    , content : String
     }
 
 type alias Model =
   { max_x  : Int 
   , max_y  : Int
   , values : A.Array (A.Array (Cell))
+  , selectedRange : (Coord, Coord)
+  , clickPressed : Bool
   }
 
