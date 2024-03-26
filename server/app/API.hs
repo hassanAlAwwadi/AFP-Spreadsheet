@@ -1,11 +1,17 @@
 {-#LANGUAGE DeriveGeneric #-}
 {-#LANGUAGE OverloadedStrings #-}
+
 module API where
 
 import Web.Scotty
 import GHC.Generics ( Generic )
-import Data.Aeson
+import Data.Aeson ( ToJSON, FromJSON )
 import Data.Maybe (fromMaybe)
+import Spreadsheet.Input (Input(..))
+import Formula ( Formula(Raw) )
+import qualified Spreadsheet as SS
+import qualified Control.Monad.State.Strict as S
+import Data.List (foldl')
 
 type Port = Int
 
@@ -34,3 +40,25 @@ defaultModel :: TableModel
 defaultModel = undefined
 -- model to be sent back if nothing changes?
 -- or maybe dont make a req at all
+
+-- for now let's assume that the change in the elm model 
+-- only happens with Raw Formulas
+-- also, we could think about clever diffing later
+-- for now let's just send the entire spreadsheet as payload
+
+type Coordinates = (Int, Int)
+type RawData     = String
+newtype RawTable = RawTable [(Coordinates, RawData)] deriving (Eq, Show, Generic)
+
+rt2Input :: RawTable -> [Input]
+rt2Input (RawTable rcs) = map (\(c, d) -> Cell c (Raw (read d :: Int))) rcs
+-- using read is iffy
+
+handleChanges :: [Input] -> S.State SS.Spreadsheet SS.Spreadsheet
+handleChanges is = do
+    currSS <- S.get
+    let afterSS = foldl' (flip SS.handle) currSS is
+    S.put afterSS
+    return afterSS
+
+-- TODO: Need to decide on Models for all 3 places (Front, Middle, Back)

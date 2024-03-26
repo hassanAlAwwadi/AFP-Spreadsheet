@@ -22,4 +22,4 @@ relative x y = Ref (Rel x) (Rel y)
 
 locate :: Int -> Target -> Int 
 locate _ (Loc i)           = i 
-locate (lodestone) (Rel i) = lodestone + i
+locate lodestone (Rel i) = lodestone + i
