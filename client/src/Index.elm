@@ -31,12 +31,12 @@ init =
 update : Msg -> Model -> Model
 update msg model =
     case msg of
-        PressCell { x, y } -> { model | selectedRange = ({ x = x, y = y }, { x = x, y = y }), clickPressed = True }
+        PressCell { x, y } -> { model | selectedRange = ({ x = x, y = y }, { x = x, y = y }), clickPressed = True, editingCell = Nothing }
         ReleaseMouse -> {model | clickPressed = False }
         AddColumns nr -> { model | max_x = model.max_x + nr}
         AddRows nr -> { model | max_y = model.max_y + nr}
-        PressTopBorder x -> { model | selectedRange = ({x = x, y = 0}, {x = x, y = model.max_y}), clickPressed = True}
-        PressBotBorder y -> { model | selectedRange = ({x = 0, y = y}, {x = model.max_x, y = y}), clickPressed = True}
+        PressTopBorder x -> { model | selectedRange = ({x = x, y = 0}, {x = x, y = model.max_y}), clickPressed = True, editingCell = Nothing}
+        PressBotBorder y -> { model | selectedRange = ({x = 0, y = y}, {x = model.max_x, y = y}), clickPressed = True, editingCell = Nothing}
         EditModeCell cell -> { model | editingCell = Just cell }
         HoverOverTopBorder x clickPressed -> if clickPressed 
             then
