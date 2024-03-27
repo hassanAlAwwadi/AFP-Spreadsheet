@@ -5,7 +5,7 @@ import Formula
 import Data.Map(Map)
 import Spreadsheet.Input
 import qualified Data.Map as M
-import Data.List((\\), delete, nub)
+import Data.List ((\\), delete, nub)
 
 -- Placeholders
 type Arr   = Map (Int, Int) (Formula Int, Int)

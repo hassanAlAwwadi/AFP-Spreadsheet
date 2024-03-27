@@ -3,6 +3,7 @@
 module Util where
 import Data.Map(Map, alter)
 import Data.List(foldl')
+import Control.Monad (unless)
 import Control.Monad.IO.Class(MonadIO)
 import qualified Text.Pretty.Simple as T
 import Control.Monad.State.Strict
@@ -62,4 +63,4 @@ visit g currNode = do
   else do
     put (M.insert currNode Temp ms)
     let neighbours = M.findWithDefault [] currNode g
-    mapM_ (visit g) neighbours
+    mapM_ (\x -> unless (M.findWithDefault Temp x ms == Perm) (visit g x)) neighbours
