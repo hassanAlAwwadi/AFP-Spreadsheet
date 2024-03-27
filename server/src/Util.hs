@@ -7,6 +7,7 @@ import Control.Monad (unless)
 import Control.Monad.IO.Class(MonadIO)
 import qualified Text.Pretty.Simple as T
 import Control.Monad.State.Strict
+    ( evalState, MonadState(put, get), State )
 import qualified Data.Set as S
 import qualified Data.Map as M
 

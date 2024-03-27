@@ -61,14 +61,20 @@ updateForwardGraph (Cell (x,y) _) b b' f = let
 propogate :: Input -> Arr -> Arr -> Graph -> Arr
 propogate (Cell (x,y) _) a a' f = let 
   v  = snd <$> (a  M.!? (x,y))
-  v' = snd <$> (a' M.!? (x,y)) 
-  nexts = bfPaths (\l -> concat $ f M.!? l) (x,y) -- need to make this a topological sort for everything to work out. 
+  v' = snd <$> (a' M.!? (x,y))
+  nexts = topSort f -- there's probably a clever way so that every change only propagates
+  -- through the relevant nodes in a topologically sorted order, but it's hard to think of that
+  -- for now, propagate changes in the right order through the entire graph
+  -- order is important for correctness
+  -- nexts = bfPaths (\l -> concat $ f M.!? l) (x,y) -- need to make this a topological sort for everything to work out. 
   in if v == v'
     then a' 
-    else altFold' a' nexts $ \acc frontier -> altFold' acc frontier $ \acc' n -> altAlter n acc' $ \case 
+    --else altFold' a' nexts $ \acc frontier -> altFold' acc frontier $ \acc' n -> altAlter n acc' $ \case 
+    else altFold' a' nexts $ \acc n -> altAlter n acc $ \case
       Nothing      -> error "broken graph in propagation?"
-      Just (fm, w) -> Just (fm, eval acc' n fm) -- actually need to somehow interweave this with the bfs 
+      Just (fm, w) -> Just (fm, eval acc n fm) -- actually need to somehow interweave this with the bfs 
         -- because if w equals "eval acc' n fm", then we don't need to add its forward arcs into the frontier.
+        -- ^not sure if this comment is still relevant (Review this Hassan?)
 
 eval :: Arr -> (Int, Int) -> Formula Int -> Int
 eval _   _     (Raw i)      = i
