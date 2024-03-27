@@ -5,6 +5,8 @@ import Formula
 import Data.Map(Map)
 import Spreadsheet.Input
 import qualified Data.Map as M
+import qualified Data.Set as S
+import Control.Monad.State.Strict
 import Data.List((\\), delete, nub)
 
 -- Placeholders
@@ -14,6 +16,25 @@ type Graph = Map (Int, Int) [(Int, Int)]
 data Spreadsheet = S { table :: Arr, backward :: Graph, forward :: Graph } 
   deriving Show
 
+cycleCheck :: Input -> Spreadsheet -> Maybe Spreadsheet
+cycleCheck inp@(Cell c _) ss@(S _ b _) = let
+  potentialBG = updateBackwardGraph inp b
+
+  dfsDetect :: (Int, Int) -> Graph -> Bool
+  dfsDetect i g = not $ evalState (dfs' i g) S.empty
+
+  dfs' :: (Int, Int) -> Graph -> State (S.Set (Int, Int)) Bool
+  dfs' i g = do
+    visited <- get
+    if S.member i visited
+    then return False
+    else do
+      put (S.insert i visited)
+      let restBools = map (\x -> evalState (dfs' x g) (S.insert i visited))
+                          (M.findWithDefault [] i g)
+      if any not restBools then return False else return True
+  in
+    if dfsDetect c potentialBG then Nothing else Just ss
 
 handle :: Input -> Spreadsheet -> Spreadsheet 
 handle i (S a b f) = let 
@@ -29,7 +50,7 @@ updateArr (Cell (x,y) v) a = M.insert (x,y) (v, eval a (x,y) v) a
 updateBackwardGraph :: Input -> Graph -> Graph 
 updateBackwardGraph (Cell (x,y) v) g = case v of 
   Raw _           -> M.delete (x,y) g
-  Ref x' y' -> M.insert (x,y) [(locate x x', locate y y')] g
+  Ref x' y'       -> M.insert (x,y) [(locate x x', locate y y')] g
   Op _ l r        -> let 
     start = M.insert (x,y) [] g 
     in M.alter (nub <$>) (x,y) $ adjustGraph r $ adjustGraph l start   where 

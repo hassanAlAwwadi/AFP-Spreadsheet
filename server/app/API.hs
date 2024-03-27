@@ -39,7 +39,7 @@ validateChange = undefined
 defaultModel :: TableModel
 defaultModel = undefined
 -- model to be sent back if nothing changes?
--- or maybe dont make a req at all
+-- or maybe no response at all
 
 -- for now let's assume that the change in the elm model 
 -- only happens with Raw Formulas
@@ -60,5 +60,6 @@ handleChanges is = do
     let afterSS = foldl' (flip SS.handle) currSS is
     S.put afterSS
     return afterSS
+-- execState (handleChanges is) (S M.empty M.empty M.empty)
 
 -- TODO: Need to decide on Models for all 3 places (Front, Middle, Back)

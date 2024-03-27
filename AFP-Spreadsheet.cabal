@@ -79,7 +79,8 @@ library
     build-depends:    
         base,
         containers, 
-        pretty-simple
+        pretty-simple,
+        mtl
         --repa
 
     -- Directories containing source files.
