@@ -63,7 +63,7 @@ propogate (Cell (x,y) _) a a' f = let
   v  = snd <$> (a  M.!? (x,y))
   v' = snd <$> (a' M.!? (x,y)) 
   nexts = bfPaths (\l -> concat $ f M.!? l) (x,y) -- need to make this a topological sort for everything to work out. 
-  in if (v == v') 
+  in if v == v'
     then a' 
     else altFold' a' nexts $ \acc frontier -> altFold' acc frontier $ \acc' n -> altAlter n acc' $ \case 
       Nothing      -> error "broken graph in propagation?"
