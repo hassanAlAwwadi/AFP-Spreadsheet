@@ -83,3 +83,12 @@ eval arr (x,y) (Op f l r) = let
 eval arr (x,y) (Un f z) = let
   z' = eval arr (x,y) z
   in f z'
+
+-- Notes:
+-- For better or for worse, decided to stick with the Map representation of Graphs
+-- Data.Graph sucks at repeated modifications of graphs 
+-- Alga sucks at constructing the graph, although modification is very easy and has nice functions
+-- Functional Graphs didn't have a topological sort
+
+-- TODOS:
+-- Need to integrate topSort in propogate
