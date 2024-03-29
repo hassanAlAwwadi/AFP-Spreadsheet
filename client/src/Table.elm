@@ -8,6 +8,7 @@ import Array as A
 import Cell exposing (..)
 import Model exposing (Msg(..))
 import Html.Events exposing (onDoubleClick)
+import Json.Decode
 
 alphabeticalTags : Int -> List String
 alphabeticalTags n =
@@ -57,6 +58,11 @@ rowToHtmlWithIndex rIndex model =
                         Html.Attributes.style "width"  "50px"
                     ,   Html.Attributes.style "height" "30px"
                     ,   Html.Attributes.style "border" "3px solid #E1AFD1"
+                    ,   Html.Events.on "keydown" (Json.Decode.andThen (\code ->
+                            if code == 13 then
+                                Json.Decode.succeed SendDataEnter
+                             else
+                                Json.Decode.fail "Not Enter") (Json.Decode.field "keyCode" Json.Decode.int))
                     ] []
             in
                 case model.editingCell of

@@ -1,6 +1,7 @@
 module Model exposing (..)
 
 import Array as A
+import Http
 
 type Msg = 
     PressCell Coord
@@ -13,6 +14,8 @@ type Msg =
   | EditModeCell Coord
   | AddRows Int
   | AddColumns Int
+  | SendDataEnter
+  | ResponseServer (Result Http.Error String)
 
 type alias Coord = { 
   x : Int,
