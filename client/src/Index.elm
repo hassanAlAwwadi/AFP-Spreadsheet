@@ -60,7 +60,7 @@ update msg model =
                 (model, Cmd.none)
         SendDataEnter -> (model, sendDataCmd model)
         ResponseServer r -> (Debug.todo "Response not handled yet", Cmd.none)
-
+        Whatever r -> (model, Cmd.none)
 view : Model -> Html.Html Msg
 view model = Html.div [Html.Attributes.style "user-drag" "none"] [
   navbar model,

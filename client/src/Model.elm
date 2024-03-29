@@ -16,6 +16,7 @@ type Msg =
   | AddColumns Int
   | SendDataEnter
   | ResponseServer (Result Http.Error String)
+  | Whatever (Result Http.Error ())
 
 type alias Coord = { 
   x : Int,

@@ -15,7 +15,7 @@ sendDataCmd m =
     in
     Http.post 
         { body = Http.jsonBody jsonBody
-        , expect = Http.expectJson ResponseServer responseDecoder
+        , expect = Http.expectWhatever Whatever --Http.expectJson ResponseServer responseDecoder
         , url = "http://localhost:31415/raw" }
 
 encodeCell : Cell -> E.Value
