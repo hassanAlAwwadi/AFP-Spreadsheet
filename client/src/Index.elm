@@ -9,10 +9,28 @@ import Cell exposing (..)
 import Table exposing (..)
 import Html
 import Cmd exposing (sendDataCmd)
+import Json.Decode as Decode
+import Browser.Events
 
 main : Program () Model Msg
 main =
-  Browser.element { init = \_ -> (init, Cmd.none), update = update, view = view, subscriptions = \_ -> Sub.none }
+  Browser.element { init = \_ -> (init, Cmd.none), update = update, view = view, subscriptions = subscriptions }
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    Browser.Events.onKeyDown keyDecoder
+
+keyDecoder : Decode.Decoder Msg
+keyDecoder =
+    Decode.map toKey (Decode.field "key" Decode.string)
+
+toKey : String -> Msg
+toKey string =
+    case String.uncons string of
+        Just ( char, "" ) ->
+            PressedLetter char
+        _ ->
+            PressedControl string
 
 init : Model
 init = 
@@ -58,9 +76,35 @@ update msg model =
                     (start, _) -> ({ model | selectedRange = (start, { x = x, y = y }) }, Cmd.none)
             else
                 (model, Cmd.none)
+        EditCellUpdate x y content -> 
+            let
+                updatedGrid =
+                    case A.get x model.values of
+                           Nothing -> model.values -- x index out of bounds, return original grid
+                           Just row ->
+                                case A.get y row of
+                                Nothing -> model.values -- y index out of bounds, return original grid
+                                Just cell ->
+                                    let
+                                        updatedCell = { cell | content = Maybe.withDefault "" (Just content)}
+                                        updatedRow = A.set y updatedCell row
+                                    in
+                                    A.set x updatedRow model.values
+            in
+            ({ model | values = updatedGrid}, Cmd.none)
+        ConfirmEdit -> confirmEdit model
         SendDataEnter -> (model, sendDataCmd model)
         ResponseServer r -> (Debug.todo "Response not handled yet", Cmd.none)
         Whatever r -> (model, Cmd.none)
+        PressedLetter char -> (model, Cmd.none)
+        PressedControl string -> 
+            case string of
+                "Enter" -> confirmEdit model
+                _ -> (model, Cmd.none)
+
+confirmEdit : Model -> (Model, Cmd Msg)
+confirmEdit model = ({ model | editingCell = Nothing }, Cmd.none)
+
 view : Model -> Html.Html Msg
 view model = Html.div [Html.Attributes.style "user-drag" "none"] [
   navbar model,

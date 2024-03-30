@@ -14,7 +14,7 @@ isBetween startCoord endCoord cx cy =
     cx >= minX && cx <= maxX && cy >= minY && cy <= maxY
 
 cellStyle : Model -> Cell -> (Coord, Coord) -> List (Html.Attribute msg)
-cellStyle model cell (startCoord, endCoord) =
+cellStyle _ cell (startCoord, endCoord) =
     let
         -- Define colors
         borderColorSelected = "#E1AFD1"

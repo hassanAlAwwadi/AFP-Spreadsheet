@@ -8,7 +8,12 @@ import Array as A
 import Cell exposing (..)
 import Model exposing (Msg(..))
 import Html.Events exposing (onDoubleClick)
-import Json.Decode
+import Html.Events exposing (onInput)
+import Html.Events exposing (onBlur)
+import Html.Events exposing (onFocus)
+import Browser.Events exposing (onKeyPress)
+import Html.Attributes exposing (placeholder)
+import Html.Attributes exposing (value)
 
 alphabeticalTags : Int -> List String
 alphabeticalTags n =
@@ -44,25 +49,27 @@ rowToHtmlWithIndex rIndex model =
             in
             let
                 notSelected =
-                    Html.td (                                                                 -- add events to cells
-                       (onMouseDown (PressCell { x = cIndex, y = rIndex}))                    -- select begin
-                    :: onMouseUp ReleaseMouse                                                 -- select end
-                    :: onDoubleClick (EditModeCell { x = cIndex, y = rIndex})                 -- enter edit mode
-                    :: (onMouseOver (HoverOver { x = cIndex, y = rIndex} model.clickPressed)) -- drag/hover, depends on clickPressed
-                    :: cellStyleAttributes                                                    -- to the base style
+                    Html.td (                                                                  -- add events to cells
+                       (onMouseDown (PressCell { x = cIndex, y = rIndex}))                     -- select begin
+                    :: onMouseUp ReleaseMouse                                                  -- select end
+                    :: onDoubleClick (EditModeCell { x = cIndex, y = rIndex})                  -- enter edit mode
+                    :: (onMouseOver (HoverOver { x = cIndex, y = rIndex} model.clickPressed))  -- drag/hover, depends on clickPressed
+                    :: cellStyleAttributes                                                     -- to the base style
                     ) 
                     [Html.text cellContent]
                     
-                selected = Html.input 
-                    [
-                        Html.Attributes.style "width"  "50px"
-                    ,   Html.Attributes.style "height" "30px"
-                    ,   Html.Attributes.style "border" "3px solid #E1AFD1"
-                    ,   Html.Events.on "keydown" (Json.Decode.andThen (\code ->
-                            if code == 13 then
-                                Json.Decode.succeed SendDataEnter
-                             else
-                                Json.Decode.fail "Not Enter") (Json.Decode.field "keyCode" Json.Decode.int))
+                selected =
+                    Html.input
+                    [ value (case A.get cIndex model.values of
+                        Nothing -> ""
+                        Just arr -> 
+                            case A.get rIndex arr of
+                                Nothing -> ""
+                                Just cell -> cell.content)
+                    , onInput (EditCellUpdate cIndex rIndex)
+                    , Html.Attributes.style "width" "50px"
+                    , Html.Attributes.style "height" "30px"
+                    , Html.Attributes.style "border" "3px solid #E1AFD1"
                     ] []
             in
                 case model.editingCell of

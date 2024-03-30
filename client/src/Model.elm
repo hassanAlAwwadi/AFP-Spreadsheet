@@ -12,11 +12,15 @@ type Msg =
   | HoverOverBotBorder Int Bool
   | HoverOver Coord Bool
   | EditModeCell Coord
+  | EditCellUpdate Int Int String
   | AddRows Int
   | AddColumns Int
+  | ConfirmEdit
   | SendDataEnter
   | ResponseServer (Result Http.Error String)
   | Whatever (Result Http.Error ())
+  | PressedLetter Char
+  | PressedControl String
 
 type alias Coord = { 
   x : Int,
