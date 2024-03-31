@@ -16,7 +16,6 @@ type Msg =
   | AddRows Int
   | AddColumns Int
   | ConfirmEdit
-  | SendDataEnter
   | ResponseServer (Result Http.Error String)
   | Whatever (Result Http.Error ())
   | PressedLetter Char

@@ -5,8 +5,8 @@ import Http
 import Json.Encode as E
 import Array exposing (Array)
 
-sendDataCmd : Model -> Cmd Msg
-sendDataCmd m = 
+sendData : Model -> Cmd Msg
+sendData m = 
     let
         jsonBody = E.object
             [ ("max_x", E.int m.max_x),

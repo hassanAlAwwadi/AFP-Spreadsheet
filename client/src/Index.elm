@@ -8,7 +8,7 @@ import Borders exposing (..)
 import Cell exposing (..)
 import Table exposing (..)
 import Html
-import Cmd exposing (sendDataCmd)
+import Cmd exposing (sendData)
 import Json.Decode as Decode
 import Browser.Events
 
@@ -93,18 +93,22 @@ update msg model =
             in
             ({ model | values = updatedGrid}, Cmd.none)
         ConfirmEdit -> confirmEdit model
-        SendDataEnter -> (model, sendDataCmd model)
         ResponseServer r -> (Debug.todo "Response not handled yet", Cmd.none)
         Whatever r -> (model, Cmd.none)
         PressedLetter char -> (model, Cmd.none)
-        PressedControl string -> 
-            case string of
-                "Enter" -> confirmEdit model
-                _ -> (model, Cmd.none)
+        PressedControl string -> if checkEnter string then confirmEdit model else (model, Cmd.none)
+
+checkEnter : String -> Bool
+checkEnter s = case s of
+    "Enter" -> True
+    _       -> False
 
 confirmEdit : Model -> (Model, Cmd Msg)
-confirmEdit model = ({ model | editingCell = Nothing }, Cmd.none)
-
+confirmEdit model = 
+    let
+       newModel = { model | editingCell = Nothing }
+    in
+       (newModel, sendData newModel)
 view : Model -> Html.Html Msg
 view model = Html.div [Html.Attributes.style "user-drag" "none"] [
   navbar model,
