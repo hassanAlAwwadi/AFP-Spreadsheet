@@ -28,3 +28,5 @@ repl-temp-*
 *~
 #*#
 *.xopp
+index.html
+main.js
