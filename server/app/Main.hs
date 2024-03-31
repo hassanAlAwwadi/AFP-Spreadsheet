@@ -1,5 +1,6 @@
 module Main where 
+import API (changeInCell)
 
 
 main :: IO ()
-main = undefined
+main = changeInCell 31415

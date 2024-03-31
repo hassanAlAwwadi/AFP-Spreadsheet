@@ -108,7 +108,9 @@ executable AFP-Spreadsheet
         scotty,
         aeson,
         AFP-Spreadsheet,
-        mtl
+        mtl,
+        wai-cors,
+        http-types
 
     -- Directories containing source files.
     hs-source-dirs:   server/app

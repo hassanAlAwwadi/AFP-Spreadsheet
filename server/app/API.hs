@@ -11,32 +11,55 @@ import Spreadsheet.Input (Input(..))
 import Formula ( Formula(Raw) )
 import qualified Spreadsheet as SS
 import qualified Control.Monad.State.Strict as S
-import Data.List (foldl')
+import Network.Wai.Middleware.Cors
+import Data.List
+import Network.HTTP.Types.Status
 
 type Port = Int
 
-data TableModel = TableModel [[String]] deriving (Eq, Show, Generic)
--- needs to be actual model
--- might need a topologically sorted graph
--- or just a model representing the change between cells (not entire graph)
+data Table = Table 
+    {
+        max_x :: Int,
+        max_y :: Int,
+        cells :: [[CellData]]
+    } deriving (Eq, Show, Generic)
 
-instance ToJSON TableModel
-instance FromJSON TableModel
+instance ToJSON Table
+instance FromJSON Table 
+
+data CellData = CellData
+    {
+        pos_x :: Int,
+        pos_y :: Int,
+        content :: String
+    } deriving (Eq, Show, Generic)
+
+instance ToJSON CellData
+instance FromJSON CellData    
+
+-- whole table sent for now
+-- check if formulas are creating cycles
+-- if yes, send error
+-- otherwise, calculate result in topological order
+-- send that as response
 
 changeInCell :: Port -> IO ()
 changeInCell pNo = scotty pNo $ do
-    post "mutCell" $ do -- currently using literal, do we need captures?
-        mutCellData :: TableModel <- jsonData
+    middleware $ cors $ const $ Just corsRP
+    options "/raw" $ do
+        status ok200
+    post "/raw" $ do -- currently using literal, do we need captures?
+        mutCellData :: Table <- jsonData
         liftIO $ print $ "These are our changes:\n" <> show mutCellData
-        let retCD = fromMaybe defaultModel validateChange
+        let retCD = mutCellData -- fromMaybe defaultModel validateChange
         json retCD
     notFound $ text "SOMETHING DIDN'T WORK. ROUTE NOT MATCHED"
 
-validateChange :: Maybe TableModel
+validateChange :: Maybe Table
 validateChange = undefined
 -- should probably be an Either
 
-defaultModel :: TableModel
+defaultModel :: Table
 defaultModel = undefined
 -- model to be sent back if nothing changes?
 -- or maybe no response at all
@@ -63,3 +86,11 @@ handleChanges is = do
 -- execState (handleChanges is) (S M.empty M.empty M.empty)
 
 -- TODO: Need to decide on Models for all 3 places (Front, Middle, Back)
+
+corsRP :: CorsResourcePolicy
+corsRP = simpleCorsResourcePolicy
+            { corsOrigins = Nothing
+            , corsMethods = ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+            , corsRequestHeaders = ["Authorization", "Content-Type"]
+            , corsExposedHeaders = Nothing
+            }
