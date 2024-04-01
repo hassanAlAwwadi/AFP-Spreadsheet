@@ -43,7 +43,7 @@ headBorderStyle model index =
             , Html.Attributes.style "padding" "8px"
             , Html.Attributes.style "background" "#f5f5f5"
             , Html.Attributes.style "min-width" "40px"
-            , Html.Attributes.style "height" "20px"
+            , Html.Attributes.style "height" "15px"
             , Html.Attributes.style "position" "sticky" -- Make it sticky
             , Html.Attributes.style "top" "100px"
             , Html.Attributes.style "left" "0"          -- Stick to the left

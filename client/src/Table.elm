@@ -45,7 +45,7 @@ rowToHtmlWithIndex rIndex model =
             let 
                 cellValue = Maybe.andThen (\row -> A.get rIndex row) (A.get cIndex model.values)
                 cellContent = Maybe.withDefault "" (Maybe.map (\x -> x.content) cellValue)
-                cellStyleAttributes = Maybe.map (\cell -> cellStyle model cell model.selectedRange) cellValue |> Maybe.withDefault []
+                cellStyleAttributes = Maybe.map (\cell -> cellStyle model cell) cellValue |> Maybe.withDefault []
             in
             let
                 notSelected =
@@ -67,7 +67,7 @@ rowToHtmlWithIndex rIndex model =
                                 Nothing -> ""
                                 Just cell -> cell.content)
                     , onInput (EditCellUpdate cIndex rIndex)
-                    , Html.Attributes.style "width" "50px"
+                    , Html.Attributes.style "width" "100%"
                     , Html.Attributes.style "height" "30px"
                     , Html.Attributes.style "border" "3px solid #E1AFD1"
                     ] []

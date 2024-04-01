@@ -40,5 +40,6 @@ type alias Model =
   , selectedRange : (Coord, Coord)
   , clickPressed : Bool
   , editingCell : Maybe Coord
+  , clipboard : Maybe (Coord, Coord)
   }
 

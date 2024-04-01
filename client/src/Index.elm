@@ -45,7 +45,7 @@ init =
                 )
             )
     in
-    Model numRows numCols initialGrid ({x = 0, y = 0}, {x = 0, y = 0}) False Nothing
+    Model numRows numCols initialGrid ({x = 0, y = 0}, {x = 0, y = 0}) False Nothing Nothing
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
@@ -56,7 +56,7 @@ update msg model =
         AddRows nr -> ({ model | max_y = model.max_y + nr}, Cmd.none)
         PressTopBorder x -> ({ model | selectedRange = ({x = x, y = 0}, {x = x, y = model.max_y}), clickPressed = True, editingCell = Nothing}, Cmd.none)
         PressBotBorder y -> ({ model | selectedRange = ({x = 0, y = y}, {x = model.max_x, y = y}), clickPressed = True, editingCell = Nothing}, Cmd.none)
-        EditModeCell cell -> ({ model | editingCell = Just cell }, Cmd.none)
+        EditModeCell cell -> ({ model | editingCell = Just cell, clipboard = Nothing}, Cmd.none)
         HoverOverTopBorder x clickPressed -> if clickPressed 
             then
                 case model.selectedRange of
@@ -95,13 +95,10 @@ update msg model =
         ConfirmEdit -> confirmEdit model
         ResponseServer r -> (Debug.todo "Response not handled yet", Cmd.none)
         Whatever r -> (model, Cmd.none)
-        PressedLetter char -> (model, Cmd.none)
-        PressedControl string -> if checkEnter string then confirmEdit model else (model, Cmd.none)
-
-checkEnter : String -> Bool
-checkEnter s = case s of
-    "Enter" -> True
-    _       -> False
+        PressedLetter char ->
+            if char == 'c' && model.editingCell == Nothing then ({model | clipboard = Just model.selectedRange}, Cmd.none) else (model, Cmd.none)
+        PressedControl string -> 
+            if string == "Enter" then confirmEdit model else (model, Cmd.none)
 
 confirmEdit : Model -> (Model, Cmd Msg)
 confirmEdit model = 
