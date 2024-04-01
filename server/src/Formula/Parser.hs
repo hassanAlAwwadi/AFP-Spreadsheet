@@ -12,7 +12,7 @@ bin_sym_table :: [(String, (Int -> Int -> Int))]
 bin_sym_table =  [("*", (*)), ("+", (+)), ("-", (-)), ("max", max), ("min", min)]
 
 un_sym_table :: [(String, (Int -> Int))]
-un_sym_table = []
+un_sym_table = [("(-)", negate)]
 
 fParser :: P.ReadP (Formula Int)
 fParser = P.skipSpaces *> P.choice
@@ -41,8 +41,10 @@ fParser = P.skipSpaces *> P.choice
 parseFormula :: String -> Maybe (Formula Int)
 parseFormula s =
   let
-    res = P.readP_to_S fParser s
+    res  = P.readP_to_S fParser s
+    mins = minimumBy (comparing (length . snd)) res
+    sm   = snd mins
   in
     case res of
       []     -> Nothing
-      _      -> Just $ fst $ minimumBy (comparing (length . snd)) res
+      _      -> if sm == "" then Just (fst mins) else Nothing
