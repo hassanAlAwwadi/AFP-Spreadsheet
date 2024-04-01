@@ -9,10 +9,6 @@ import Cell exposing (..)
 import Model exposing (Msg(..))
 import Html.Events exposing (onDoubleClick)
 import Html.Events exposing (onInput)
-import Html.Events exposing (onBlur)
-import Html.Events exposing (onFocus)
-import Browser.Events exposing (onKeyPress)
-import Html.Attributes exposing (placeholder)
 import Html.Attributes exposing (value)
 
 alphabeticalTags : Int -> List String

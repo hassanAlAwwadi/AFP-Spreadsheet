@@ -4,7 +4,10 @@ import Model exposing (Model, Msg(..))
 import Html.Attributes exposing (class, style)
 import Html exposing (Html, div, text)
 import Html.Events exposing (onClick)
-
+import Html.Attributes exposing (value)
+import Html.Events exposing (onInput)
+import Array as A
+import Json.Decode exposing (null)
 
 navbarHeight : String
 navbarHeight = "100px"
@@ -37,17 +40,31 @@ buttonStyle msg label =
     Html.button ((onClick msg) :: bStyle) [ text label ]
 
 
-cellEditor : Html Msg
-cellEditor =
+cellEditor : Model -> Html Msg
+cellEditor model =
     div [ style "flex" "3", style "margin" "5px" ]
         [ Html.input
-            [ style "width" "85%"
+            ((case model.editingCell of
+                Nothing -> []
+                Just {x, y} -> [onInput (EditCellUpdate x y)])
+            ++
+            [ 
+              value (case model.editingCell of
+                  Nothing -> ""
+                  Just {x, y} ->
+                    (case A.get x model.values of
+                                Nothing -> ""
+                                Just arr -> 
+                                    case A.get y arr of
+                                        Nothing -> ""
+                                        Just cell -> cell.content))
+            , style "width" "85%"
             , style "height" "30px"
             , style "padding" "5px"
             , style "box-sizing" "border-box"
             , style "border" "none"
             , style "border-radius" "5px"
-            ]
+            ])
             []
         ]
 
@@ -72,7 +89,7 @@ navbar model =
             , style "align-items" "center"
             ] [
             addMore
-            , cellEditor
+            , cellEditor model
             ]
             ]
         ]
