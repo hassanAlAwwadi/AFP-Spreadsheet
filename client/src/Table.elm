@@ -40,7 +40,9 @@ rowToHtmlWithIndex rIndex model =
         cells = List.indexedMap (\cIndex _ -> 
             let 
                 cellValue = Maybe.andThen (\row -> A.get rIndex row) (A.get cIndex model.values)
-                cellContent = Maybe.withDefault "" (Maybe.map (\x -> x.content) cellValue)
+                cellContent = Maybe.withDefault "" (Maybe.map (\x -> case x.value of 
+                    Err err -> err 
+                    Ok str -> str) cellValue)
                 cellStyleAttributes = Maybe.map (\cell -> cellStyle model cell) cellValue |> Maybe.withDefault []
             in
             let

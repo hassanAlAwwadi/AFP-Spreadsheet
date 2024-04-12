@@ -41,7 +41,7 @@ init =
         initialGrid =
             A.initialize numRows (\row ->
                 A.initialize numCols (\col ->
-                    Cell row col ""
+                    Cell row col "" (Ok "")
                 )
             )
     in
@@ -93,13 +93,44 @@ update msg model =
             in
             ({ model | values = updatedGrid}, Cmd.none)
         ConfirmEdit -> confirmEdit model
-        ResponseServer r -> (Debug.todo "Response not handled yet", Cmd.none)
+        ResponseServer r -> case r of 
+            Err _       -> (model, Cmd.none)
+            Ok either -> case either of 
+                Err ((x,y), err) -> case A.get x model.values of
+                           Nothing -> (model,  Cmd.none)
+                           Just row ->
+                                case A.get y row of
+                                Nothing -> (model,  Cmd.none)
+                                Just cell -> 
+                                    let
+                                        new_row = A.set y { cell | value =  Err err} row
+                                        new_table = { model | values = A.set x new_row model.values }
+                                    in  (new_table, Cmd.none)
+                                
+                Ok values ->
+                    let 
+                        newvalues = insertAllValues values model.values
+                    in ({model | values = newvalues}, Cmd.none)
         Whatever r -> (model, Cmd.none)
         PressedLetter char ->
             if char == 'c' && model.editingCell == Nothing then ({model | clipboard = Just model.selectedRange}, Cmd.none) else (model, Cmd.none)
         PressedControl string -> 
             if string == "Enter" then confirmEdit model else (model, Cmd.none)
 
+
+insertAllValues: List (( Int, Int ), String) -> A.Array (A.Array Cell) -> A.Array (A.Array Cell)
+insertAllValues new values = case new of 
+    [] -> values 
+    (((x,y),val) :: rest) -> case A.get x values of
+                           Nothing -> insertAllValues rest values
+                           Just row ->
+                                case A.get y row of
+                                Nothing -> insertAllValues rest values
+                                Just cell -> 
+                                    let
+                                        new_row = A.set y { cell | value =  Ok val} row
+                                        new_values = A.set x new_row values
+                                    in  insertAllValues rest new_values
 confirmEdit : Model -> (Model, Cmd Msg)
 confirmEdit model = 
     let

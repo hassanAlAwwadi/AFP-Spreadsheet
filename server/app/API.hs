@@ -58,9 +58,9 @@ changeInCell pNo ref = scotty pNo $ do
         mutCellData :: Input <- jsonData
         let input =  parse_date mutCellData
         case input of 
-          Nothing -> text $ fromString "malformed input."
-          Just i  -> case SS.cycleCheck i spreadsheet of
-            Nothing -> text $ fromString "cycle detected."
+          Nothing   -> json @String "Err: Malformed Input."
+          Just i    -> case SS.cycleCheck i spreadsheet of
+            Nothing -> json @String "Err: Cycle detected."
             Just ss -> do 
               let (ss'@(SS.S _ _ _), diff) = SS.handle i ss
               liftIO $ putStrLn $ "Changes: " ++ show diff 

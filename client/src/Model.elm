@@ -16,7 +16,7 @@ type Msg =
   | AddRows Int
   | AddColumns Int
   | ConfirmEdit
-  | ResponseServer (Result Http.Error String)
+  | ResponseServer (Result Http.Error (Result ((Int,Int), String) (List ((Int,Int), String))))
   | Whatever (Result Http.Error ())
   | PressedLetter Char
   | PressedControl String
@@ -26,11 +26,14 @@ type alias Coord = {
   y : Int
   }
 
+type alias CellResponse = { xy : Coord, value : Int }
+
 type alias Cell =
     { 
       pos_x : Int
     , pos_y : Int
     , content : String
+    , value   : Result String String
     }
 
 type alias Model =

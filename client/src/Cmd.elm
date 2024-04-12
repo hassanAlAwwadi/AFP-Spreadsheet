@@ -4,7 +4,8 @@ import Model exposing (..)
 import Http
 import Json.Encode as E
 import Array as A 
-
+import Json.Decode exposing (Decoder, field, index, int, string, oneOf, map, map2)
+import Json.Decode exposing (list)
 
 sendData : Model -> Cmd Msg
 sendData m = case m.editingCell of 
@@ -21,7 +22,7 @@ sendData m = case m.editingCell of
               ("cell", encodeCell cell) ] -- only encode the updated cell
         in Http.post 
           { body = Http.jsonBody jsonBody
-          , expect = Http.expectWhatever Whatever --Http.expectJson ResponseServer responseDecoder
+          , expect =  Http.expectJson ResponseServer (responseDecoder x y)
           , url = "http://localhost:31415/raw" }
 
 encodeCell : Cell -> E.Value
@@ -33,4 +34,16 @@ encodeCell c = E.object
 encodeSS : A.Array (A.Array Cell) -> E.Value
 encodeSS aac = E.array (E.array encodeCell) aac
 
-responseDecoder = Debug.todo "Yes, I will need to receive the processed response and deconstruct it"
+responseDecoder : Int -> Int -> Decoder (Result ((Int,Int), String) (List ((Int,Int), String)))
+responseDecoder x y = oneOf 
+  [
+    map Ok (map (List.map (\((v, w), val) -> ((v,w),val))) 
+      (list 
+        (map2 (Tuple.pair) 
+          (index 0 (map2 (Tuple.pair) 
+            (index 0 int) 
+            (index 1 int))) 
+          (map String.fromInt (index 1 int)))))
+  , map (\s -> Err ((x,y), s)) string
+
+  ]
