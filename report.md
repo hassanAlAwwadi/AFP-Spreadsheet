@@ -200,7 +200,7 @@ visit g currNode = do
     mapM_ (\x -> unless (M.findWithDefault Temp x ms == Perm) (visit g x)) neighbours
 ```
 
-One thing to notice is that, thanks to the State Monad, we get to write these algorithms "imperitavely", having to make no changes from the textbook definitions of these algorithms. In fact the implementations of both these algorithms are directly based off of wikipedia!
+One thing to notice is that, thanks to the State Monad, we get to write these algorithms "imperatively", having to make no changes from the textbook definitions of these algorithms. In fact the implementations of both these algorithms are directly based off of wikipedia!
 
 ## Parsing and Evaluation
 
@@ -263,25 +263,28 @@ cell04 = c0-r0 -- refers to cell00
 
 -- relative positioning
 cell02 = c$+1-r0 -- refers to cell03
--- things after $ are integers used to calculate based on current cell's positioning
+-- things after $ are integers used to calculate data based on current cell's positioning
 ```
 
 # Reflection and Improvements
 
-Awesome - State Monad and Monads in general. 
+The project really showed Haskell's power in being a "boring" language. The fanciest thing we ended up using were Monads (State Monads, most of the time) and although we were initially worried because a lot of literature about implementing Spreadsheets and it's algorithms were focused on imperative algorithms, we had no trouble translating these into Haskell.
 
-Struggles -
-1) Propagation was hard
-2) CORS policy
+We actively wanted to avoid unnecessary complexity, so our choices in terms of libraries and data structures also worked out well. Scotty was extremely easy to use. We were able to get our hands dirty with the "Parse, don't validate" style of programming, which lent itself very well to the problem we were trying to solve.
 
-Improvements - 
-1) Prefix operators
-2) Better language, function support
-3) More spreadsheet features, such as operations based on multiple
-   cells
-4) Storing data in a more permanent place
-5) Clever diffing of results, or using event sourcing to reduce payload size
-6) Better time management by us, and more features in general
+### Some Struggles
+
+1) Propagation was hard. Making it bug-free took us a while.
+2) It takes a lot of work to make the front-end look pretty! And sometimes you end up missing some Haskell features in Elm. This leads to avoidable repetition sometimes
+2) Because none of us were really web programmers, for a while our server wasn't receiving any requests from our client thanks to an incorrect CORS policy. Unfortunately we didn't even know what a CORS polcy was, to be able to fix it (for a while)
+
+### Future Improvements 
+
+1) Prefix operators are not ideal. They need to go!
+2) A better domain specific language for cell information. Function support is one important thing we would have liked to have added
+3) More spreadsheet features, such as operations based on multiple cells
+4) Storing data in a more permanent place (Maybe a database?). Currently we just use a IORef for temporary session based storage
+5) Better time management by us, and more features in general
 
 
 
