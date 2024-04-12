@@ -103,9 +103,9 @@ update msg model =
 confirmEdit : Model -> (Model, Cmd Msg)
 confirmEdit model = 
     let
-       newModel = { model | editingCell = Nothing }
+       newModel = { model | editingCell = Nothing  }
     in
-       (newModel, sendData newModel)
+       ( newModel, sendData model)
 view : Model -> Html.Html Msg
 view model = Html.div [Html.Attributes.style "user-drag" "none"] [
   navbar model,

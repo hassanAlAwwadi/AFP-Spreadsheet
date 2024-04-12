@@ -21,7 +21,7 @@ data Table = Table
     {
         max_x :: Int,
         max_y :: Int,
-        cells :: [[CellData]]
+        cell :: CellData
     } deriving (Eq, Show, Generic)
 
 instance ToJSON Table

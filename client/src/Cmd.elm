@@ -13,8 +13,9 @@ sendData m = case m.editingCell of
     Nothing -> Http.cancel "updated row out of table range"
     Just row -> case A.get y row of 
       Nothing -> Http.cancel "updated column out of table range"
-      Just cell -> let 
-        jsonBody = E.object
+      Just cell -> 
+        let 
+          jsonBody = E.object
             [ ("max_x", E.int m.max_x),
               ("max_y", E.int m.max_y),
               ("cell", encodeCell cell) ] -- only encode the updated cell
