@@ -1,3 +1,4 @@
+{-# LANGUAGE ScopedTypeVariables #-}
 module Formula.Parser where
 
 import Formula
@@ -14,26 +15,32 @@ bin_sym_table =  [("*", (*)), ("+", (+)), ("-", (-)), ("max", max), ("min", min)
 un_sym_table :: [(String, (Int -> Int))]
 un_sym_table = [("(-)", negate)]
 
+
+run_parser :: String -> (Maybe (Formula Int))
+run_parser str = case P.readP_to_S fParser str of 
+  []     -> Nothing 
+  (x:xs) -> Just (fst x)
+
 fParser :: P.ReadP (Formula Int)
 fParser = P.skipSpaces *>
-  (    P.char '(' *> fParser <* P.char ')'
-  P.<++ Raw <$> read @Int <$> P.munch1 C.isDigit
+  (     (P.char '(' *> fParser <* P.char ')')
+  P.<++ (Raw <$> read @Int <$> P.munch1 C.isDigit)
   -- very fragile
-  P.<++ Ref
+  P.<++ (Ref
       <$ P.char 'c' <*> tParserC
       <* P.char '-' 
-      <* P.char 'r' <*> tParserR
-  P.<++ flip Ref
+      <* P.char 'r' <*> tParserR)
+  P.<++ (flip Ref
       <$ P.char 'r' <*> tParserR
       <* P.char '-' 
-      <* P.char 'c' <*> tParserC
-  P.<++ Un
+      <* P.char 'c' <*> tParserC)
+  P.<++ (Un
     <$> uParser
-    <*> fParser
-  P.<++ Op
+    <*> fParser)
+  P.<++ (Op
     <$> bParser
     <*> fParser
-    <*> fParser
+    <*> fParser)
   ) where
     tParserR = P.choice
       [ Loc <$> read @Int <$> P.munch1 C.isDigit

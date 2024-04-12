@@ -62,7 +62,9 @@ library
     exposed-modules:  Spreadsheet,
                       Spreadsheet.Input,
                       -- adding this because I want access to Input
-                      Formula
+                      Formula,
+                      Formula.Parser
+
                       -- because I want Formula
 
     -- Modules included in this library but not exported.
@@ -71,7 +73,6 @@ library
         -- Spreadsheet.Input
         Spreadsheet.Example
         -- Formula
-        Formula.Parser
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
 
@@ -110,7 +111,9 @@ executable AFP-Spreadsheet
         AFP-Spreadsheet,
         mtl,
         wai-cors,
-        http-types
+        http-types,
+        containers, 
+
 
     -- Directories containing source files.
     hs-source-dirs:   server/app

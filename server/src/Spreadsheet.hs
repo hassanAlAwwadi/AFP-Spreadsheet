@@ -14,21 +14,27 @@ type Graph = Map (Int, Int) [(Int, Int)]
 data Spreadsheet = S { table :: Arr, backward :: Graph, forward :: Graph } 
   deriving Show
 
+type Diff = [((Int,Int), Int)]
+empty :: Spreadsheet
+empty = S M.empty M.empty M.empty
+
 cycleCheck :: Input -> Spreadsheet -> Maybe Spreadsheet
 cycleCheck inp@(Cell c _) ss@(S _ b _) = if dfsDetect c (updateBackwardGraph inp b) 
                                          then Nothing 
                                          else Just ss
 
-handle :: Input -> Spreadsheet -> Spreadsheet 
+handle :: Input -> Spreadsheet -> (Spreadsheet, Diff)
 handle i (S a b f) = let 
-  b'  = updateBackwardGraph i b
-  f'  = updateForwardGraph i b b' f -- ^, yes, we need a lot of extra info
-  a'  = updateArr i a
-  a'' = propogate i a a' f' 
-  in S a'' b' f'
+  b'           = updateBackwardGraph i b
+  f'           = updateForwardGraph i b b' f -- ^, yes, we need a lot of extra info
+  (a', diff)   = updateArr i a
+  (a'', diff') = propogate i a (a', diff) f' 
+  in (S a'' b' f', diff')
 
-updateArr   :: Input  -> Arr -> Arr 
-updateArr (Cell (x,y) v) a = M.insert (x,y) (v, eval a (x,y) v) a
+updateArr   :: Input  -> Arr -> (Arr, Diff) 
+updateArr (Cell (x,y) v) a = let 
+  value = eval a (x,y) v 
+  in (M.insert (x,y) (v, value) a, [((x,y), value)])
 
 updateBackwardGraph :: Input -> Graph -> Graph 
 updateBackwardGraph (Cell (x,y) v) g = case v of 
@@ -58,23 +64,18 @@ updateForwardGraph (Cell (x,y) _) b b' f = let
     Just l  -> Just $ (x,y):l   
   in f'' 
 
-propogate :: Input -> Arr -> Arr -> Graph -> Arr
-propogate (Cell (x,y) _) a a' f = let 
+propogate :: Input -> Arr -> (Arr, Diff) -> Graph -> (Arr, Diff)
+propogate (Cell (x,y) _) a (a', diff) f = let 
   v  = snd <$> (a  M.!? (x,y))
   v' = snd <$> (a' M.!? (x,y))
-  nexts = topSort f -- there's probably a clever way so that every change only propagates
-  -- through the relevant nodes in a topologically sorted order, but it's hard to think of that
-  -- for now, propagate changes in the right order through the entire graph
-  -- order is important for correctness
-  -- nexts = bfPaths (\l -> concat $ f M.!? l) (x,y) -- need to make this a topological sort for everything to work out. 
+  nexts = topSort f 
   in if v == v'
-    then a' 
-    --else altFold' a' nexts $ \acc frontier -> altFold' acc frontier $ \acc' n -> altAlter n acc' $ \case 
-    else altFold' a' nexts $ \acc n -> altAlter n acc $ \case
+    then (a', diff) 
+    else altFold' (a', diff) nexts $ \(acc, diff) n -> case acc M.!? n of
       Nothing      -> error "broken graph in propagation?"
-      Just (fm, w) -> Just (fm, eval acc n fm) -- actually need to somehow interweave this with the bfs 
-        -- because if w equals "eval acc' n fm", then we don't need to add its forward arcs into the frontier.
-        -- ^not sure if this comment is still relevant (Review this Hassan?)
+      Just (fm, w) -> let 
+        value = eval acc n fm 
+        in (M.insert n (fm, value) acc, (n, value):diff)
 
 eval :: Arr -> (Int, Int) -> Formula Int -> Int
 eval _   _     (Raw i)      = i
