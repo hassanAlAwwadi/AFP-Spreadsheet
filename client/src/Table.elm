@@ -11,20 +11,21 @@ import Html.Events exposing (onDoubleClick)
 import Html.Events exposing (onInput)
 import Html.Attributes exposing (value)
 
-alphabeticalTags : Int -> List String
-alphabeticalTags n =
-    List.map (\i -> convertToBase26 (i + 1)) (List.range 0 (n - 1))
+numericalTags : Int -> List String
+numericalTags n = List.map String.fromInt (List.range 0 (n - 1))
+    
+--List.map (\i -> convertToBase26 (i + 1)) (List.range 0 (n - 1))
 
-convertToBase26 : Int -> String
-convertToBase26 n =
-    if n <= 0 then
-        ""
-    else
-        let
-            remainder = Basics.modBy 26 (n - 1) 
-            quotient = (n - 1) // 26
-        in
-        convertToBase26 quotient ++ String.fromChar (Char.fromCode (65 + remainder))
+-- convertToBase26 : Int -> String
+-- convertToBase26 n =
+--     if n <= 0 then
+--         ""
+--     else
+--         let
+--             remainder = Basics.modBy 26 (n - 1) 
+--             quotient = (n - 1) // 26
+--         in
+--         convertToBase26 quotient ++ String.fromChar (Char.fromCode (65 + remainder))
 
 rowToHtmlWithIndex : Int -> Model -> Html.Html Msg
 rowToHtmlWithIndex rIndex model =
@@ -81,7 +82,7 @@ createHeader : Model -> List (Html.Html Msg)
 createHeader model =
     let
         headers =
-            alphabeticalTags model.max_x
+            numericalTags model.max_x
         corner = Html.th [
           Html.Attributes.style "border" "1px solid black",
           Html.Attributes.style "background" "#d4d4d4"

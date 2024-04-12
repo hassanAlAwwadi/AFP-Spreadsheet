@@ -255,10 +255,15 @@ Here `locate` is a function used to find out the exact information about the ref
 
 -- Binary operator example
 cell00 = "+ 4 2"
-cell03 = "+ + 4 2 + 4"
+cell03 = "+ 4 + 4 2 "
+-- Yes we're using Prefix notation, sorry :)
 
--- how do I refer to the data from 00 and 03?
-cell05 = undefined
+-- absolute positioning
+cell04 = c0-r0 -- refers to cell00
+
+-- relative positioning
+cell02 = c$+1-r0 -- refers to cell03
+-- things after $ are integers used to calculate based on current cell's positioning
 ```
 
 # Reflection and Improvements
