@@ -28,11 +28,11 @@ fParser = P.skipSpaces *>
   -- very fragile
   P.<++ (Ref
       <$ P.char 'c' <*> tParser
-      <* P.char '-' 
+      <* P.choice [P.char '-', P.char ':', pure ' ']
       <* P.char 'r' <*> tParser)
   P.<++ (flip Ref
       <$ P.char 'r' <*> tParser
-      <* P.char '-' 
+      <* P.choice [P.char '-', P.char ':', pure ' ']
       <* P.char 'c' <*> tParser)
   P.<++ (Un
     <$> uParser
