@@ -266,7 +266,8 @@ cell04 = c0-r0 -- refers to cell00
 
 -- relative positioning
 cell02 = c$+1-r$+0 -- refers to cell03
--- things after $ are integers used to calculate data based on the current cell's positioning
+-- things after $ are integers used to calculate data 
+   based on the current cell's positioning
 ```
 
 To test out the application, build the frontend using elm (or simply use elm reactor within the client subdirectory, and then navigate to the index page), and do a cabal run for the backend.
