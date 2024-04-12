@@ -272,19 +272,20 @@ The project really showed Haskell's power in being a "boring" language. The fanc
 
 We actively wanted to avoid unnecessary complexity, so our choices in terms of libraries and data structures also worked out well. Scotty was extremely easy to use. We were able to get our hands dirty with the "Parse, don't validate" style of programming, which lent itself very well to the problem we were trying to solve.
 
-### Some Struggles
+\newpage
+## Some Struggles
 
-1) Propagation was hard. Making it bug-free took us a while.
-2) It takes a lot of work to make the front-end look pretty! And sometimes you end up missing some Haskell features in Elm. This leads to avoidable repetition sometimes
-2) Because none of us were really web programmers, for a while our server wasn't receiving any requests from our client thanks to an incorrect CORS policy. Unfortunately we didn't even know what a CORS polcy was, to be able to fix it (for a while)
+- Propagation was hard. Making it bug-free took us a while.
+- It takes a lot of work to make the front-end look pretty! And sometimes you end up missing some Haskell features in Elm. This leads to avoidable repetition sometimes
+- Because none of us were really web programmers, for a while our server wasn't receiving any requests from our client thanks to an incorrect CORS policy. Unfortunately we didn't even know what a CORS polcy was, to be able to fix it (for a while)
 
-### Future Improvements 
+## Future Improvements 
 
-1) Prefix operators are not ideal. They need to go!
-2) A better domain specific language for cell information. Function support is one important thing we would have liked to have added
-3) More spreadsheet features, such as operations based on multiple cells
-4) Storing data in a more permanent place (Maybe a database?). Currently we just use a IORef for temporary session based storage
-5) Better time management by us, and more features in general
+- Prefix operators are not ideal. They need to go!
+- A better domain specific language for cell information. Function support is one important thing we would have liked to have added
+- More spreadsheet features, such as operations based on multiple cells
+- Storing data in a more permanent place (Maybe a database?). Currently we just use a IORef for temporary session based storage
+- Better time management by us, and more features in general
 
 
 
