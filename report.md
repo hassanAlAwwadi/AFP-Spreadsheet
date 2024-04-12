@@ -108,7 +108,7 @@ type Msg =
   | AddRows Int
   | AddColumns Int
   | ConfirmEdit
-  | ResponseServer (Result Http.Error String)
+  | ResponseServer (Result Http.Error (Result ((Int,Int), String) (List ((Int,Int), String))))
   | PressedLetter Char
   | PressedControl String
 
@@ -122,6 +122,7 @@ type alias Cell =
       pos_x : Int
     , pos_y : Int
     , content : String
+    , value   : Result String String
     }
 
 type alias Model =
@@ -214,6 +215,7 @@ Formula  ::= Integer
           | BinaryOp Formula Formula
 
 RTerm    ::= '$' Integer
+           | Integer
 
 BinaryOp ::= '*' | '+' | '-' | 'max' | 'min'
 
@@ -262,9 +264,11 @@ cell03 = "+ 4 + 4 2 "
 cell04 = c0-r0 -- refers to cell00
 
 -- relative positioning
-cell02 = c$+1-r0 -- refers to cell03
+cell02 = c$+1-r$+0 -- refers to cell03
 -- things after $ are integers used to calculate data based on current cell's positioning
 ```
+
+To test out the application, build the frontend using elm (or simply use elm reactor within the client subdirectory, and then navigate to the index page), and do a cabal run for the backend.
 
 # Reflection and Improvements
 
@@ -275,18 +279,34 @@ We actively wanted to avoid unnecessary complexity, so our choices in terms of l
 \newpage
 ## Some Struggles
 
-- Propagation was hard. Making it bug-free took us a while.
-- It takes a lot of work to make the front-end look pretty! And sometimes you end up missing some Haskell features in Elm. This leads to avoidable repetition sometimes
-- Because none of us were really web programmers, for a while our server wasn't receiving any requests from our client thanks to an incorrect CORS policy. Unfortunately we didn't even know what a CORS polcy was, to be able to fix it (for a while)
+### Propagation 
+
+This was hard. Graphs are not a solved feature in haskell, so we had to do a lot of graph work ourselves, and we are no experts. Having to reinvent the wheel (badly) because no userfriendly wheel was present is annoying. 
+
+### Front end 
+
+Our frontend looks good, we think, but it took a lot of time to get it looking good and working good. Largely we can write this off as personal lack of experience. None of us were a real frontend dev...
+
+
+### WEBDEV 
+
+We are no webdevs, and because of this we struggled with annoying bugs for way longer than we needed to. One example is that for a while our server wasn't receiving any requests from our client thanks to an incorrect CORS policy. Unfortunately we didn't even know what a CORS policy was, to be able to fix it :(
 
 ## Future Improvements 
 
-- Prefix operators are not ideal. They need to go!
-- A better domain specific language for cell information. Function support is one important thing we would have liked to have added
-- More spreadsheet features, such as operations based on multiple cells
-- Storing data in a more permanent place (Maybe a database?). Currently we just use a IORef for temporary session based storage
-- Better time management by us, and more features in general
+There remain a lot of features that we wanted to add but ended up leaving out because of time. 
 
+### Infix operators 
+Right now we use a prefix notation, which is nice because we don't have to bother with associativity, but is not the nicest user experience. 
 
+### Domain Specific Language 
+We have a few prebuild functions for operating on data, but lack any way for users to create their own lambda functions. This is sorely missed, I think, especially since we only have a very select number of functions to start with. 
 
+### Spreadsheet features 
+Talking about limited number of functions, one thing to note is that we basically only have one unary function, a few binary functions, but 0 more than binary functions. A particular feature that we are missing out on is functions that work on *ranges* of data, like `SUM A1:A10` or the like. Nor do we have any nonerary functions, like a CLOCK function that just spits out unit time wherever its called. `if then else` would also be a usefull addition... 
 
+### Website
+Right now when the program is executed it makes an IORef holding an empty spreadsheet, and this is its single source of truth for spreadsheets. There is no way for our program to function as a *website*, since it can basically only interact with a single frontend page. We need to have a single spreadsheet per session user, so that multiple clients could communicate with the server at the same time without tripping over eachother's feet. 
+
+### Our Selves 
+In many ways the project is immaterial, more importantly we felt that if we had managed our time better, we could have gotten way mroe features in, and way more personal development in haskell, elm, graphs, and project work. Though this project will be shelved for now, we hope that our personal development will continue on, to new ventures :).
