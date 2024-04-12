@@ -17,7 +17,7 @@ header-includes: |
 
 # Introduction
 
-For our AFP project we decided to build a Spreadsheet-like tool on top of a webserver. In doing so, we worked with different aspects of application development - front-end development in the browser, back-end server work with Haskell, and writing algorithms for data structures such as graphs.
+For our AFP project we decided to build a Spreadsheet-like tool on top of a webserver. In doing so, we worked with different aspects of application development - front-end development in the browser with Elm, back-end server work with Haskell, and writing algorithms for data structures such as graphs.
 
 A spreadsheet is a tool for organizing, analyzing and storing information in a tabular form, where each cell can contain primitive data, formulas and/or functions. To help with the propagation of information through the cells, we use two graphs - The forward graph and the backward graph. Every node in our forward graph points to nodes that depend on it for information; this graph is used for the propagation of changes through our spreadsheet. The backward graph is for convenience, and is a trade-off between time and space. If a dependency is changed because of a change in a formula, instead of going through every edge of a node in the forward graph, in the backward graph we point to every nodes' parent. Thus if we change that node to depend on another parent, or no parent at all, we know this immediately through the backward graph. A crucial constraint here is that these graphs must be _Directed Acyclic Graphs_ (DAGs).
 
@@ -61,7 +61,7 @@ type Arr   = Map (Int, Int) (Formula Int, Int)
 
 We were able to support the following features of a spreadsheet:
 
-- Raw data input (For example, just a number "42")
+- Raw data input (For example, just the number "42")
 - Reference based information - Both absolute and relative. Absolute reference points to an exact location in our spreadsheet, whereas a relative reference points to a cell based on the cell that we write this formula in
 - Basic arithmetic operations
 
@@ -140,13 +140,13 @@ We use Scotty as our web framework, and use JSON to marshall data between Elm an
 # Important Concepts and Techniques
 
 Several classic graph algorithms were implemented by us as part of this project.
-Several of this rely on, and are to maintain the acyclic nature of our graph. 
+They rely on, and maintain the acyclic nature of our graphs.
 
 ## Graph Algorithms
 
 ### Depth First Search (DFS)
 
-If the DFS of our graph hits a node that it has seen before already, then we know that we've found a cycle.
+If the DFS of our graph hits a node that it has seen before already, then we know that we've found a cycle. This is done immediately after the user gives a formula input.
 
 ```Haskell
 dfsDetect :: (Int, Int) -> Map (Int, Int) [(Int, Int)] -> Bool
@@ -166,6 +166,8 @@ dfs' i g = do
 ### Topological Sort 
 
 To make sure that we propagate the changes through the right nodes, and in the right order, we must topologically sort a graph, i.e., calculate the formula of a node, only after the possible recalculation of it's parent - otherwise we end up with incorrect information.
+
+The Topological Sort also acts as a sanity check, because it too reveals if somehow have introduced a cyclic dependency in our graph.
 
 ```Haskell
 topSort :: Map (Int, Int) [(Int, Int)] -> [(Int, Int)]
@@ -205,19 +207,19 @@ One thing to notice is that, thanks to the State Monad, we get to write these al
 To implement the spreadsheet, we had to support a tiny language. This is for the calculation of formulas. The grammar of our language is:
 
 ```
-Formula ::= Integer
+Formula  ::= Integer
           | 'c' RTerm 'r' RTerm
           | 'r' RTerm 'c' RTerm
           | UnaryOp Formula
           | BinaryOp Formula Formula
 
-RTerm ::= '$' Integer
+RTerm    ::= '$' Integer
 
 BinaryOp ::= '*' | '+' | '-' | 'max' | 'min'
 
-UnaryOp ::= '(-)'
+UnaryOp  ::= '(-)'
 
-Integer ::= [0-9]+
+Integer  ::= [0-9]+
 ```
 
 We used **Parser Combinators** to implement the parser for the grammar. Specifically, we used the `Text.ParserCombinators.ReadP` library.
@@ -244,7 +246,7 @@ Here `locate` is a function used to find out the exact information about the ref
 
 # Results and Examples
 
-1) We were able to make quite a nice GUI, we highly recommend you build the project and check it out. Elm was very pleasant to work with, even for someone not experience in front-end work.
+1) We were able to make quite a nice GUI, we highly recommend you build the project and check it out. Elm was very pleasant to work with, even for someone not experienced in front-end work.
 2) Propagation of data through our `Data.Map` based graph was implemented.
 3) A tiny language's parser and evaluator were also implemented.
 

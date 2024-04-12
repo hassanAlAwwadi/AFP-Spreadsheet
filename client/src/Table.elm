@@ -35,7 +35,7 @@ rowToHtmlWithIndex rIndex model =
             :: onMouseOver (HoverOverBotBorder rIndex model.clickPressed)
             :: onMouseUp ReleaseMouse
             :: (sideBorderStyle model rIndex))
-            [ Html.text (String.fromInt (rIndex + 1))]
+            [ Html.text (String.fromInt (rIndex))]
         
         cells = List.indexedMap (\cIndex _ -> 
             let 
